@@ -5,7 +5,7 @@ using TensorOperations
 MPS_left_psi=MPS_left; # input tensor array here. Tensor is always stored as M(s1,a1,a2) where s1 is the physical index, a1 and a2 are the bond indices.
 MPS_left_phi=MPS_left; # 2nd input tensor array here.
 MPS_left_phi_dag=Array{Complex128,3}[]; #Empty array for phi^†
-@show typeof(MPS_left_phi_dag)
+#@show typeof(MPS_left_phi_dag)
 
 L=length(MPS_left_psi); # Length of the physical chain
 d=size(MPS_left_psi[1])[1]; # size of the local Hilbert space
