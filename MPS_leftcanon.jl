@@ -5,7 +5,7 @@ MPS_left_psi=Array{Complex128,3}[];
 
 L=length(MPS_psi); # Length of the physical chain
 d=size(MPS_psi[1])[1]; # size of the local Hilbert space
-chi=5; #define cutoff for the number of bond-dimensions to keep.
+D=5; #define cutoff for the number of bond-dimensions to keep.
 
 
 #Treat first site separately
@@ -14,7 +14,7 @@ M2=MPS_psi[2];
 sz_M2=size(M2);
 M1_SVD=svdfact(M1);
 sz_U=size(M1_SVD[:U]);
-BD=min(sz_U[2],chi); #Finds the appropriate bonddimension, BD : number of columns is chi or that in U depending on whichever is smaller
+BD=min(sz_U[2],D); #Finds the appropriate bonddimension, BD : number of columns is chi or that in U depending on whichever is smaller
 A1=zeros(Complex128,sz_U[1],1,BD);
 A1[:,1,:]=M1_SVD[:U][:,1:BD];
 push!(MPS_left_psi,A1);
@@ -31,7 +31,7 @@ for p=3:length(MPS_psi)
  	M2_tilde_mat=reshape(M2_tilde[:],d*sz_M2_tilde[2],sz_M2_tilde[3]);
         M2_tilde_SVD=svdfact(M2_tilde_mat);
         sz_U=size(M2_tilde_SVD[:U]);
-        BD=min(sz_U[2],chi);
+        BD=min(sz_U[2],D);
         A2=zeros(Complex128,d,sz_M2_tilde[2],BD);
         A2=reshape(M2_tilde_SVD[:U][:,1:BD],d,sz_M2_tilde[2],BD);
 	push!(MPS_left_psi,A2);

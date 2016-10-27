@@ -1,4 +1,4 @@
-#Given two MPS states, MPS_left_phi (in left-canonical form), and MPS_left_psi calculate the contraction. <phi|psi>
+#Given two MPS states, MPS_left_phi (in left-canonical form), and MPS_left_psi calculate the contraction. <phi|psi> Section 4.4 Schoolwock
 using TensorOperations
 
 
