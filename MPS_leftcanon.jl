@@ -1,4 +1,4 @@
-#Generate a left canonical MPS from a random MPS
+#Generate a left canonical MPS from a random MPS and implement truncation by SVD
 using TensorOperations
 MPS_psi=; # input tensor array here
 MPS_left_psi=Array{Complex128,3}[];
