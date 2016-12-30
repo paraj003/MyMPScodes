@@ -9,7 +9,7 @@
 # Apply_U_Ubar_left() :For evolution of MPS (A1)-(A2) using U and Ubar, as in section 7.1.2 of Schoolwock and gives a compressed output. The state is not normalized, and the normalization must be done at the end of the tensor.
 module MPS_module
 using TensorOperations
-export Apply_U_Ubar_left, Wavefunc_to_MPS_left,Compress_SVD_MPS_left,
+export Apply_U_Ubar_left, Wavefunc_to_MPS_left,Compress_SVD_MPS_left,Contract_MPS_left,Apply_U_Ubar_left_uncompressed
 
 
 function Wavefunc_to_MPS_left(Psi_in,d,L)
@@ -88,7 +88,7 @@ function Compress_SVD_MPS_left(MPS_psi,D)
 end
 
 function Contract_MPS_left(MPS_left_phi,MPS_left_psi)
-#Given two MPS states, MPS_left_phi (in left-canonical form), and MPS_left_psi calculate the contraction. <phi|psi> Section 4.4 Schoolwock
+#Given two MPS states, MPS_left_phi (in left-canonical form), and MPS_left_psi calculate the contraction. <phi|psi> Section 4.4 Schoolwock, Fig 21
 	MPS_left_phi_dag=Array{Complex128,3}[];
 	L=length(MPS_left_psi); # Length of the physical chain
 	d=size(MPS_left_psi[1])[1]; # size of the local Hilbert space
@@ -115,7 +115,7 @@ function Contract_MPS_left(MPS_left_phi,MPS_left_psi)
 	        sz_M1=size(M1);
 	        M_tilde_dag=MPS_left_phi_dag[p];
 	        sz_M_tilde_dag=size(M_tilde_dag);
-	        M2=zeros(Complex128,d,sz_M_tilde_dag[2],sz_M1[1]);
+	        M2=zeros(Complex128,d,sz_M_tilde_dag[2],sz_M1[2]);
 	        @tensor M2[s1,a1,a3]=M_tilde_dag[s1,a1,a2]*M1[a2,a3];
 	
 	        #contract bond of type (3) and (4) simultaneously to generate a matrix like M1
@@ -126,7 +126,7 @@ function Contract_MPS_left(MPS_left_phi,MPS_left_psi)
 	        @tensor M1[a1,a2]=M2[s1,a1,a3]*M[s1,a3,a2];
 	end
 	phi_psi_innerprod=M1;
-	return phi_psi_innerprod
+	return phi_psi_innerprod[1,1]
 
 end
 
@@ -146,7 +146,7 @@ function Apply_U_Ubar_left(A0_SV,A1_tensor,A2_tensor,U,Ubar,D)
 
         #Now group indices together : a2 and k for A1_tilde_tensor, and (a1,k) for A2_tilde_tensor.
         # then compress by SVD reduce Dd^2->D 
-        A1_out_tensor=reshape(A1_tilde_tensor,d,size(A1_tensor)[2],size(A1_tensor)[3]*d^2);
+        A1_out_tensor=reshape(A1_tilde_tensor,d,size(A0_SV)[1],size(A1_tensor)[3]*d^2);
         A2_out_tensor=reshape(A2_tilde_tensor,d,size(A2_tensor)[2]*d^2,size(A2_tensor)[3]);
 
         ## combine  physical index and a1
@@ -165,6 +165,24 @@ function Apply_U_Ubar_left(A0_SV,A1_tensor,A2_tensor,U,Ubar,D)
         A2_SV=diagm(A2_temp_SVD[:S])*(A2_temp_SVD[:V])' ## Send A2_SV to the next tensor.
         return A1_out_trunc_tensor,A2_out_trunc_tensor,A2_SV
 end
+
+function Apply_U_Ubar_left_uncompressed(A1_tensor,A2_tensor,U,Ubar,D)
+# This function is designed to apply U*Ubar and do not compress.
+
+        d=size(Ubar)[1];#the dimension of the physical Hilbert space
+        A1_tilde_tensor=zeros(Complex128,d,size(A1_tensor)[2],size(A1_tensor)[3],d^2);
+        A2_tilde_tensor=zeros(Complex128,d,size(A2_tensor)[2],d^2,size(A2_tensor)[3]);
+
+        @tensor A1_tilde_tensor[s1,a1,a2,k]=A1_tensor[s1prime,a1,a2]*U[s1,s1prime,k];
+        @tensor A2_tilde_tensor[s2,a1,k,a2]=A2_tensor[s2prime,a1,a2]*Ubar[s2,s2prime,k];
+
+        #Now group indices together : a2 and k for A1_tilde_tensor, and (a1,k) for A2_tilde_tensor.
+        A1_out_tensor=reshape(A1_tilde_tensor,d,size(A1_tensor)[2],size(A1_tensor)[3]*d^2);
+        A2_out_tensor=reshape(A2_tilde_tensor,d,size(A2_tensor)[2]*d^2,size(A2_tensor)[3]);
+
+       return A1_out_tensor,A2_out_tensor
+end
+
 
 
 end
